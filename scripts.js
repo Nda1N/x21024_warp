@@ -4,6 +4,8 @@ const popupVideo = document.getElementById('popupVideo');
 const closeButton = document.getElementById('closeButton');
 const tapHint = document.getElementById('tapHint');
 const markerStatus = document.getElementById('markerStatus');
+const canvas = document.createElement('canvas');
+const ctx = canvas.getContext('2d');
 
 // 動画のパスを指定
 const videoPaths = {
@@ -25,10 +27,9 @@ const videoPaths = {
     ocean4: ['seaturtle_tb.mov', 'seaturtle_t.mov']
 };
 
-// 各マーカーの再生状態を管理
+// 再生中のフラグと現在の動画インデックス
 let isPlaying = false;
 let currentVideoIndex = 0;
-let currentVideoIndices = {};  // 各マーカーの動画インデックスを管理
 
 // 動画を事前に読み込む関数
 const preloadVideos = () => {
@@ -68,17 +69,17 @@ function showTapHint() {
 }
 
 // 動画を再生する関数
-function showPopupVideo(videoPathsArray, markerId) {
+function showPopupVideo(videoPathsArray) {
     if (isPlaying) return;
 
     isPlaying = true;
-    currentVideoIndex = currentVideoIndices[markerId] || 0;
+    currentVideoIndex = 0;
     const video = popupVideo;
 
-    // 動画を再読み込みして再生する関数
-    function reloadAndPlayVideo(index) {
+    function playVideo(index) {
         video.src = videoPathsArray[index];
-        video.load(); // 再読み込みを明示的に行う
+        video.load();
+        video.loop = true;
         video.play();
         showTapHint();
     }
@@ -95,17 +96,15 @@ function showPopupVideo(videoPathsArray, markerId) {
 
     video.onerror = () => {
         setTimeout(() => {
-            reloadAndPlayVideo(currentVideoIndex);  // 再読み込み
+            playVideo(currentVideoIndex);
         }, 500);
     };
 
-    reloadAndPlayVideo(currentVideoIndex);
+    playVideo(currentVideoIndex);
 
     video.addEventListener('click', () => {
-        // クリック時に切り替える
         currentVideoIndex = (currentVideoIndex + 1) % videoPathsArray.length;
-        reloadAndPlayVideo(currentVideoIndex);  // 切り替え
-        currentVideoIndices[markerId] = currentVideoIndex; // インデックスを保存
+        playVideo(currentVideoIndex);
     });
 
     closeButton.addEventListener('click', () => {
@@ -117,21 +116,6 @@ function showPopupVideo(videoPathsArray, markerId) {
     });
 }
 
-// マーカー検出時に1秒間ポップアップを表示してから再生を開始
-function handleMarkerDetection(markerId) {
-    if (isPlaying) return;
-
-    const videoPathsArray = videoPaths[markerId]; // マーカーに対応した動画パスを選択
-
-    // 1秒間ポップアップを表示
-    videoPopup.style.display = 'block';
-    loadingCircle.style.display = 'block';
-    setTimeout(() => {
-        // 1秒後にメイン動画再生を開始
-        showPopupVideo(videoPathsArray, markerId);
-    }, 1000); // 1秒間遅延して再生開始
-}
-
 // マーカーイベントを処理
 document.querySelectorAll('a-marker').forEach(marker => {
     marker.addEventListener('markerFound', () => {
@@ -139,7 +123,11 @@ document.querySelectorAll('a-marker').forEach(marker => {
 
         const markerId = marker.id;
         if (videoPaths[markerId]) {
-            handleMarkerDetection(markerId);  // マーカー検出時に1秒遅延して再生開始
+            // 1秒間ポップアップを表示
+            setTimeout(() => {
+                showPopupVideo(videoPaths[markerId]);
+            }, 1000);  // 1秒間ポップアップを表示
+
             updateMarkerStatus(true, true);  // マーカーが見つかった時に緑色で表示
         }
     });
