@@ -139,7 +139,7 @@ function initialPlayForMarker(markerId) {
     };
     setTimeout(() => {
         video.pause(); // 初回再生後、すぐに停止
-    }, 100); // 一瞬だけ再生させる
+    }, 1500); // 一瞬だけ再生させる時間を少し長く設定
 }
 
 // ループ再生を有効にする関数
@@ -158,7 +158,7 @@ document.querySelectorAll('a-marker').forEach(marker => {
             setTimeout(() => {
                 showPopupVideo(videoPaths[markerId], markerId);
                 enableLooping(popupVideo); // ループ再生を有効にする
-            }, 1000);
+            }, 2000); // ポップアップの表示を少し遅らせる
         }
 
         updateMarkerStatus(true, true);  // マーカーが見つかった時に緑色で表示
