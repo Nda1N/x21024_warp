@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AR Marker Example</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="https://cdn.rawgit.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+    <script src="scripts.js" defer></script>
+</head>
+<body>
+    <div id="loadingCircle"></div>
+    <div id="videoPopup">
+        <video id="popupVideo" playsinline webkit-playsinline muted></video>
+        <button id="closeButton">✖︎</button> <!-- 終了ボタン -->
+    </div>
+    <div id="loadingCircle" style="display: none;">ローディング中...</div>
+    <div id="tapHint" style="display: none;">タップで映像を切り替える</div>
+
+    <div id="markerStatus" style="
+    position: fixed;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 10px 20px;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border-radius: 5px;
+    font-size: 16px;
+    display: none;
+    z-index: 1000;
+    text-align: center;
+    "></div>
+
+    <!-- 赤い正方形の枠 -->
+    <div id="markerBoundary"></div>
+
+    <a-scene embedded arjs>
+        <!-- City Markers -->
+        <a-marker id="city1" type="pattern" url="markers/city1.patt"></a-marker>
+        <a-marker id="city2" type="pattern" url="markers/city2.patt"></a-marker>
+        <a-marker id="city3" type="pattern" url="markers/city3.patt"></a-marker>
+        <a-marker id="city4" type="pattern" url="markers/city4.patt"></a-marker>
+
+        <!-- Grass Markers -->
+        <a-marker id="grass1" type="pattern" url="markers/grass1.patt"></a-marker>
+        <a-marker id="grass2" type="pattern" url="markers/grass2.patt"></a-marker>
+        <a-marker id="grass3" type="pattern" url="markers/grass3.patt"></a-marker>
+        <a-marker id="grass4" type="pattern" url="markers/grass4.patt"></a-marker>
+
+        <!-- Jungle Markers -->
+        <a-marker id="jungle1" type="pattern" url="markers/jungle1.patt"></a-marker>
+        <a-marker id="jungle2" type="pattern" url="markers/jungle2.patt"></a-marker>
+        <a-marker id="jungle3" type="pattern" url="markers/jungle3.patt"></a-marker>
+        <a-marker id="jungle4" type="pattern" url="markers/jungle4.patt"></a-marker>
+
+        <!-- Ocean Markers -->
+        <a-marker id="ocean1" type="pattern" url="markers/ocean1.patt"></a-marker>
+        <a-marker id="ocean2" type="pattern" url="markers/ocean2.patt"></a-marker>
+        <a-marker id="ocean3" type="pattern" url="markers/ocean3.patt"></a-marker>
+        <a-marker id="ocean4" type="pattern" url="markers/ocean4.patt"></a-marker>
+
+        <a-entity camera></a-entity>
+    </a-scene>
+</body>
+</html>

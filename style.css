@@ -1,0 +1,98 @@
+/* 赤い正方形の枠のスタイル */
+#markerBoundary {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 60vmin;  /* 幅と高さをvminで設定 */
+    height: 60vmin;
+    border: 5px solid red;  /* 枠を赤に設定 */
+    background-color: transparent; /* 中は透明にする */
+    z-index: 999;
+}
+
+#tapHint {
+    position: absolute;
+    top: 5%;
+    right: 10%;
+    background: rgba(255, 0, 0, 0.7);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 10px;
+    font-size: 14px;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    pointer-events: none; /* ヒントがタップを妨げないように */
+    z-index: 1000; /* 他の要素の上に表示 */
+}
+#tapHint.show {
+    opacity: 1;
+}
+
+
+/* 横画面時にサファリのタブを隠す */
+@media screen and (orientation: landscape) {
+    body {
+        overflow: hidden; /* スクロールを無効にしてタブを隠す */
+    }
+    /* タブの色を無効にして画面全体をフルスクリーンにする */
+    html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+    }
+    /* Safariのタブを隠すために、iOSのスクリーン向き変更を確保 */
+    meta[name="apple-mobile-web-app-status-bar-style"] {
+        content: black-translucent; /* タブを隠すために設定 */
+    }
+}
+
+/* ローディングアニメーションのスタイル */
+#loadingCircle {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 50px;
+    height: 50px;
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    display: none; /* 初期状態で非表示 */
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ビデオポップアップのスタイル */
+#videoPopup {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.8);
+}
+
+#popupVideo {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+#closeButton {
+    position: absolute;
+    top: 5%;
+    right: 5%;
+    background-color: red;
+    color: white;
+    font-size: 18px;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+}
