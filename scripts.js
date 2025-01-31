@@ -76,32 +76,45 @@ function showPopupVideo(videoPathsArray) {
     currentVideoIndex = 0;
     const video = popupVideo;
 
-    function playVideo(index) {
-        video.src = videoPathsArray[index];
-        video.load();
-        video.loop = true;
-        video.play();
-        showTapHint();
-    }
+    // 動画がロードされるのを待つPromiseを作成
+    const loadVideos = () => {
+        return new Promise((resolve, reject) => {
+            let loadedVideos = 0;
+            const videos = videoPathsArray.map(path => {
+                const videoElement = document.createElement('video');
+                videoElement.src = path;
+                videoElement.preload = 'auto';
+                videoElement.muted = true;
+
+                videoElement.oncanplaythrough = () => {
+                    loadedVideos++;
+                    if (loadedVideos === videoPathsArray.length) {
+                        resolve();  // 両方の動画がロードされたらresolve
+                    }
+                };
+
+                videoElement.onerror = () => reject('動画の読み込みに失敗しました');
+            });
+        });
+    };
 
     loadingCircle.style.display = 'block';
     videoPopup.style.display = 'none';
 
-    video.oncanplaythrough = () => {
-        loadingCircle.style.display = 'none';
-        videoPopup.style.display = 'block';
-        updateMarkerStatus(true, true); // 動画再生中はステータスを表示
-        video.play();
-    };
+    // 動画が2つともロードされてから再生を開始
+    loadVideos()
+        .then(() => {
+            loadingCircle.style.display = 'none';
+            videoPopup.style.display = 'block';
+            video.play();
+            showTapHint();
+        })
+        .catch(error => {
+            console.error(error);
+            loadingCircle.style.display = 'none';
+        });
 
-    video.onerror = () => {
-        setTimeout(() => {
-            playVideo(currentVideoIndex);
-        }, 500);
-    };
-
-    playVideo(currentVideoIndex);
-
+    // 動画再生開始
     video.addEventListener('click', () => {
         currentVideoIndex = (currentVideoIndex + 1) % videoPathsArray.length;
         playVideo(currentVideoIndex);
