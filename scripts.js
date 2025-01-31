@@ -4,8 +4,6 @@ const popupVideo = document.getElementById('popupVideo');
 const closeButton = document.getElementById('closeButton');
 const tapHint = document.getElementById('tapHint');
 const markerStatus = document.getElementById('markerStatus');
-const canvas = document.createElement('canvas');
-const ctx = canvas.getContext('2d');
 
 // 動画のパスを指定
 const videoPaths = {
@@ -80,7 +78,7 @@ function showPopupVideo(videoPathsArray, markerId) {
     // 動画を再読み込みして再生する関数
     function reloadAndPlayVideo(index) {
         video.src = videoPathsArray[index];
-        video.load();
+        video.load(); // 再読み込みを明示的に行う
         video.play();
         showTapHint();
     }
@@ -104,6 +102,7 @@ function showPopupVideo(videoPathsArray, markerId) {
     reloadAndPlayVideo(currentVideoIndex);
 
     video.addEventListener('click', () => {
+        // クリック時に切り替える
         currentVideoIndex = (currentVideoIndex + 1) % videoPathsArray.length;
         reloadAndPlayVideo(currentVideoIndex);  // 切り替え
         currentVideoIndices[markerId] = currentVideoIndex; // インデックスを保存
