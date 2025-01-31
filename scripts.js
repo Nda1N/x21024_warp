@@ -4,6 +4,8 @@ const popupVideo = document.getElementById('popupVideo');
 const closeButton = document.getElementById('closeButton');
 const tapHint = document.getElementById('tapHint');
 const markerStatus = document.getElementById('markerStatus');
+const canvas = document.createElement('canvas');
+const ctx = canvas.getContext('2d');
 
 // 動画のパスを指定
 const videoPaths = {
@@ -25,9 +27,10 @@ const videoPaths = {
     ocean4: ['seaturtle_tb.mov', 'seaturtle_t.mov']
 };
 
-// 各マーカーごとの動画インデックスを保存
-let currentVideoIndices = {};
+
+// 再生中のフラグと現在の動画インデックス
 let isPlaying = false;
+let currentVideoIndex = 0;
 
 // 動画を事前に読み込む関数
 const preloadVideos = () => {
@@ -44,7 +47,7 @@ const preloadVideos = () => {
 
 // マーカー検出ステータスを更新する関数
 function updateMarkerStatus(show, isMarkerFound = false) {
-    if (isPlaying) return;
+    if (isPlaying) return; // 映像再生中は表示しない
 
     if (show) {
         if (isMarkerFound) {
@@ -66,18 +69,12 @@ function showTapHint() {
     tapHint.classList.add('show');
 }
 
-// 動画を再生する関数（修正済み）
-function showPopupVideo(markerId, videoPathsArray) {
+// 動画を再生する関数
+function showPopupVideo(videoPathsArray) {
     if (isPlaying) return;
 
     isPlaying = true;
-
-    // もし初回ならインデックスを 0 に設定
-    if (!(markerId in currentVideoIndices)) {
-        currentVideoIndices[markerId] = 0;
-    }
-    
-    let currentVideoIndex = currentVideoIndices[markerId];
+    currentVideoIndex = 0;
     const video = popupVideo;
 
     function playVideo(index) {
@@ -94,7 +91,7 @@ function showPopupVideo(markerId, videoPathsArray) {
     video.oncanplaythrough = () => {
         loadingCircle.style.display = 'none';
         videoPopup.style.display = 'block';
-        updateMarkerStatus(true, true);
+        updateMarkerStatus(true, true); // 動画再生中はステータスを表示
         video.play();
     };
 
@@ -106,22 +103,17 @@ function showPopupVideo(markerId, videoPathsArray) {
 
     playVideo(currentVideoIndex);
 
-    // `click` で動画を切り替えるイベントを最初に登録
-    popupVideo.onclick = () => {
-        video.pause();
-        currentVideoIndex = (currentVideoIndex + 1) % 2;
-        video.src = videoPathsArray[currentVideoIndex];
-        video.load();
-        video.play();
-        currentVideoIndices[markerId] = currentVideoIndex; // インデックスを保存
-    };
+    video.addEventListener('click', () => {
+        currentVideoIndex = (currentVideoIndex + 1) % videoPathsArray.length;
+        playVideo(currentVideoIndex);
+    });
 
     closeButton.addEventListener('click', () => {
         video.pause();
         video.currentTime = 0;
         videoPopup.style.display = 'none';
         isPlaying = false;
-        updateMarkerStatus(false);
+        updateMarkerStatus(false); // ×ボタンを押したらステータス非表示
     });
 }
 
@@ -133,16 +125,16 @@ document.querySelectorAll('a-marker').forEach(marker => {
         const markerId = marker.id;
         if (videoPaths[markerId]) {
             setTimeout(() => {
-                showPopupVideo(markerId, videoPaths[markerId]);
+                showPopupVideo(videoPaths[markerId]);
             }, 1000);
         }
 
-        updateMarkerStatus(true, true);
+        updateMarkerStatus(true, true);  // マーカーが見つかった時に緑色で表示
     });
 
     marker.addEventListener('markerLost', () => {
         if (!isPlaying) {
-            updateMarkerStatus(true, false);
+            updateMarkerStatus(true, false);  // マーカーが見つからない場合は赤色で表示
         }
     });
 });
@@ -150,88 +142,5 @@ document.querySelectorAll('a-marker').forEach(marker => {
 // ページロード時に動画を事前ロード
 window.addEventListener('load', () => {
     preloadVideos();
-    updateMarkerStatus(false);
-});
-// マーカーごとの現在の動画インデックスを保持するオブジェクト
-let currentVideoIndices = {};
-
-// 動画を再生する関数（修正）
-function showPopupVideo(markerId, videoPathsArray) {
-    if (isPlaying) return;
-
-    isPlaying = true;
-
-    // もし初回ならインデックスを 0 に設定
-    if (!(markerId in currentVideoIndices)) {
-        currentVideoIndices[markerId] = 0;
-    }
-    
-    let currentVideoIndex = currentVideoIndices[markerId];
-    const video = popupVideo;
-
-    function playVideo(index) {
-        video.src = videoPathsArray[index];
-        video.load();
-        video.loop = true;
-        video.play();
-        showTapHint();
-    }
-
-    loadingCircle.style.display = 'block';
-    videoPopup.style.display = 'none';
-
-    video.oncanplaythrough = () => {
-        loadingCircle.style.display = 'none';
-        videoPopup.style.display = 'block';
-        updateMarkerStatus(true, true);
-        video.play();
-    };
-
-    video.onerror = () => {
-        setTimeout(() => {
-            playVideo(currentVideoIndex);
-        }, 500);
-    };
-
-    playVideo(currentVideoIndex);
-
-    // `click` で動画を切り替えるイベントを最初に登録
-    popupVideo.onclick = () => {
-        video.pause();
-        currentVideoIndex = (currentVideoIndex + 1) % 2;
-        video.src = videoPathsArray[currentVideoIndex];
-        video.load();
-        video.play();
-        currentVideoIndices[markerId] = currentVideoIndex; // インデックスを保存
-    };
-
-    closeButton.addEventListener('click', () => {
-        video.pause();
-        video.currentTime = 0;
-        videoPopup.style.display = 'none';
-        isPlaying = false;
-        updateMarkerStatus(false);
-    });
-}
-
-// マーカーイベントを処理（修正）
-document.querySelectorAll('a-marker').forEach(marker => {
-    marker.addEventListener('markerFound', () => {
-        if (isPlaying) return;
-
-        const markerId = marker.id;
-        if (videoPaths[markerId]) {
-            setTimeout(() => {
-                showPopupVideo(markerId, videoPaths[markerId]);
-            }, 1000);
-        }
-
-        updateMarkerStatus(true, true);
-    });
-
-    marker.addEventListener('markerLost', () => {
-        if (!isPlaying) {
-            updateMarkerStatus(true, false);
-        }
-    });
+    updateMarkerStatus(false); // 初期状態は非表示
 });
