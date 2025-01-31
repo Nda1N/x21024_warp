@@ -29,7 +29,6 @@ const videoPaths = {
 let isPlaying = false;
 let currentVideoIndex = 0;
 let currentVideoIndices = {};  // 各マーカーの動画インデックスを管理
-let initialPlayDone = {};  // 各マーカーごとの初回再生フラグ
 
 // 動画を事前に読み込む関数
 const preloadVideos = () => {
@@ -118,27 +117,19 @@ function showPopupVideo(videoPathsArray, markerId) {
     });
 }
 
-// 初回の再生をマーカーごとに行う関数
-function initialPlayForMarker(markerId) {
-    if (initialPlayDone[markerId]) return;  // 初回の再生が終わっていれば何もしない
+// マーカー検出時に1秒間ポップアップを表示してから再生を開始
+function handleMarkerDetection(markerId) {
+    if (isPlaying) return;
 
-    initialPlayDone[markerId] = true;
-    const video = popupVideo;
     const videoPathsArray = videoPaths[markerId]; // マーカーに対応した動画パスを選択
 
-    // 初回再生を裏で一瞬だけ行う
-    video.src = videoPathsArray[0];
-    video.load();
-    video.muted = true; // 音を消す
-    video.play();
+    // 1秒間ポップアップを表示
+    videoPopup.style.display = 'block';
+    loadingCircle.style.display = 'block';
     setTimeout(() => {
-        video.pause(); // 初回再生後、すぐに停止
-    }, 3000); // 初回再生時間を3000msに設定（長めに）
-}
-
-// ループ再生を有効にする関数
-function enableLooping(video) {
-    video.loop = true;
+        // 1秒後にメイン動画再生を開始
+        showPopupVideo(videoPathsArray, markerId);
+    }, 1000); // 1秒間遅延して再生開始
 }
 
 // マーカーイベントを処理
@@ -148,16 +139,9 @@ document.querySelectorAll('a-marker').forEach(marker => {
 
         const markerId = marker.id;
         if (videoPaths[markerId]) {
-            initialPlayForMarker(markerId); // 初回再生を行う
-
-            // 初回再生後、少し待ってからポップアップ動画を表示
-            setTimeout(() => {
-                showPopupVideo(videoPaths[markerId], markerId);
-                enableLooping(popupVideo); // ループ再生を有効にする
-            }, 4000); // ポップアップ表示を少し遅らせる（4000msに設定）
+            handleMarkerDetection(markerId);  // マーカー検出時に1秒遅延して再生開始
+            updateMarkerStatus(true, true);  // マーカーが見つかった時に緑色で表示
         }
-
-        updateMarkerStatus(true, true);  // マーカーが見つかった時に緑色で表示
     });
 
     marker.addEventListener('markerLost', () => {
