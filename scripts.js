@@ -142,6 +142,11 @@ function initialPlayForMarker(markerId) {
     }, 100); // 一瞬だけ再生させる
 }
 
+// ループ再生を有効にする関数
+function enableLooping(video) {
+    video.loop = true;
+}
+
 // マーカーイベントを処理
 document.querySelectorAll('a-marker').forEach(marker => {
     marker.addEventListener('markerFound', () => {
@@ -152,6 +157,7 @@ document.querySelectorAll('a-marker').forEach(marker => {
             initialPlayForMarker(markerId); // 初回再生を行う
             setTimeout(() => {
                 showPopupVideo(videoPaths[markerId], markerId);
+                enableLooping(popupVideo); // ループ再生を有効にする
             }, 1000);
         }
 
