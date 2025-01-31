@@ -131,15 +131,9 @@ function initialPlayForMarker(markerId) {
     video.load();
     video.muted = true; // 音を消す
     video.play();
-    video.onended = () => {
-        // 初回再生が終わったら次の動画へ切り替える
-        video.src = videoPathsArray[1];
-        video.load();
-        video.play();
-    };
     setTimeout(() => {
         video.pause(); // 初回再生後、すぐに停止
-    }, 1500); // 一瞬だけ再生させる時間を少し長く設定
+    }, 3000); // 初回再生時間を3000msに設定（長めに）
 }
 
 // ループ再生を有効にする関数
@@ -158,7 +152,7 @@ document.querySelectorAll('a-marker').forEach(marker => {
             setTimeout(() => {
                 showPopupVideo(videoPaths[markerId], markerId);
                 enableLooping(popupVideo); // ループ再生を有効にする
-            }, 2000); // ポップアップの表示を少し遅らせる
+            }, 2500); // ポップアップ表示を少し遅らせる（長めに待機）
         }
 
         updateMarkerStatus(true, true);  // マーカーが見つかった時に緑色で表示
