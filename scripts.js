@@ -27,7 +27,6 @@ const videoPaths = {
     ocean4: ['seaturtle_tb.mov', 'seaturtle_t.mov']
 };
 
-
 // 再生中のフラグと現在の動画インデックス
 let isPlaying = false;
 let currentVideoIndex = 0;
@@ -124,12 +123,15 @@ document.querySelectorAll('a-marker').forEach(marker => {
 
         const markerId = marker.id;
         if (videoPaths[markerId]) {
-            setTimeout(() => {
-                showPopupVideo(videoPaths[markerId]);
-            }, 1000);
-        }
+            // 1回目の検出時にも2種類の映像を正しく再生するため、強制的に markerLost を発生させる
+            updateMarkerStatus(true, false);
 
-        updateMarkerStatus(true, true);  // マーカーが見つかった時に緑色で表示
+            // 500ms 後に再びマーカーを検出
+            setTimeout(() => {
+                updateMarkerStatus(true, true);
+                showPopupVideo(videoPaths[markerId]);
+            }, 500);
+        }
     });
 
     marker.addEventListener('markerLost', () => {
