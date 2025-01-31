@@ -25,10 +25,11 @@ const videoPaths = {
     ocean4: ['seaturtle_tb.mov', 'seaturtle_t.mov']
 };
 
-// 再生中のフラグと現在の動画インデックス
+// 各マーカーの再生状態を管理
 let isPlaying = false;
 let currentVideoIndex = 0;
 let currentVideoIndices = {};  // 各マーカーの動画インデックスを管理
+let initialPlayDone = {};  // 各マーカーごとの初回再生フラグ
 
 // 動画を事前に読み込む関数
 const preloadVideos = () => {
@@ -117,6 +118,30 @@ function showPopupVideo(videoPathsArray, markerId) {
     });
 }
 
+// 初回の再生をマーカーごとに行う関数
+function initialPlayForMarker(markerId) {
+    if (initialPlayDone[markerId]) return;  // 初回の再生が終わっていれば何もしない
+
+    initialPlayDone[markerId] = true;
+    const video = popupVideo;
+    const videoPathsArray = videoPaths[markerId]; // マーカーに対応した動画パスを選択
+
+    // 初回再生を裏で一瞬だけ行う
+    video.src = videoPathsArray[0];
+    video.load();
+    video.muted = true; // 音を消す
+    video.play();
+    video.onended = () => {
+        // 初回再生が終わったら次の動画へ切り替える
+        video.src = videoPathsArray[1];
+        video.load();
+        video.play();
+    };
+    setTimeout(() => {
+        video.pause(); // 初回再生後、すぐに停止
+    }, 100); // 一瞬だけ再生させる
+}
+
 // マーカーイベントを処理
 document.querySelectorAll('a-marker').forEach(marker => {
     marker.addEventListener('markerFound', () => {
@@ -124,6 +149,7 @@ document.querySelectorAll('a-marker').forEach(marker => {
 
         const markerId = marker.id;
         if (videoPaths[markerId]) {
+            initialPlayForMarker(markerId); // 初回再生を行う
             setTimeout(() => {
                 showPopupVideo(videoPaths[markerId], markerId);
             }, 1000);
