@@ -149,10 +149,12 @@ document.querySelectorAll('a-marker').forEach(marker => {
         const markerId = marker.id;
         if (videoPaths[markerId]) {
             initialPlayForMarker(markerId); // 初回再生を行う
+
+            // 初回再生後、少し待ってからポップアップ動画を表示
             setTimeout(() => {
                 showPopupVideo(videoPaths[markerId], markerId);
                 enableLooping(popupVideo); // ループ再生を有効にする
-            }, 2500); // ポップアップ表示を少し遅らせる（長めに待機）
+            }, 4000); // ポップアップ表示を少し遅らせる（4000msに設定）
         }
 
         updateMarkerStatus(true, true);  // マーカーが見つかった時に緑色で表示
